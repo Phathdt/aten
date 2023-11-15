@@ -1,0 +1,10 @@
+
+*
+!*/
+!*.*
+!**/Dockerfile
+
+/.env
+/.idea/
+**/.DS_Store
+/tempo-data
