@@ -2,18 +2,20 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/CaliberVB/service-context/component/fiberc"
 	"os"
 	"time"
 
-	sctx "github.com/CaliberVB/service-context"
-	"telifi/shared/common"
+	"github.com/phathdt/service-context/component/fiberc"
+
+	"aten/shared/common"
+
+	sctx "github.com/phathdt/service-context"
 
 	"github.com/spf13/cobra"
 )
 
 const (
-	serviceName = "auth-service"
+	serviceName = "aten"
 )
 
 func newServiceCtx() sctx.ServiceContext {

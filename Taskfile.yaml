@@ -3,23 +3,9 @@ version: '3'
 dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
 
 tasks:
-  bot-server:
+  aten:
     cmds:
-      - cd services/bot_service && GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o telifi-bot-server cmd/server/main.go
-      - docker-compose build bot-server
-      - cd services/bot_service && rm telifi-bot-server
-      - docker-compose up bot-server
-
-  bot-consumer:
-    cmds:
-      - cd services/bot_service && GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o telifi-bot-consumer cmd/consumer/main.go
-      - docker-compose build bot-consumer
-      - cd services/bot_service && rm telifi-bot-consumer
-      - docker-compose up bot-consumer
-
-  wallet-server:
-    cmds:
-      - cd services/wallet_service && GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o telifi-wallet-server cmd/server/main.go
-      - docker-compose build wallet-server
-      - cd services/wallet_service && rm telifi-wallet-server
-      - docker-compose up wallet-server
+      - GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o aten ./main.go
+      - docker-compose build app
+      - rm aten
+      - docker-compose up aten

@@ -1,6 +1,6 @@
 package main
 
-import "telifi/cmd"
+import "aten/cmd"
 
 func main() {
 	cmd.Execute()
