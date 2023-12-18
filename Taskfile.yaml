@@ -9,3 +9,15 @@ tasks:
       - docker-compose build app
       - rm aten
       - docker-compose up aten
+
+  migrate:
+    cmds:
+      - cd migrator && yarn migrate
+
+  format:
+    cmds:
+      - cd migrator && yarn format
+
+  gen-migrate:
+    cmds:
+      - cd migrator && yarn prisma migrate dev --name "{{.CLI_ARGS}}"
