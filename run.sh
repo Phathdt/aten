@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Migrate"
-cd migrator && yarn migrate
+./aten migrate up
+
 echo "Start server..."
 ./aten

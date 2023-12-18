@@ -1,15 +1,13 @@
-package main
+package cmd
 
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
-
-	"github.com/namsral/flag"
-
 	_ "github.com/lib/pq"
+	"github.com/namsral/flag"
 	"github.com/pressly/goose/v3"
+	"github.com/spf13/cobra"
+	"log"
 )
 
 const dialect = "postgres"
@@ -20,51 +18,52 @@ var (
 	dir   = flags.String("dir", "./migrations", "directory with migration files")
 )
 
-func init() {
-	flag.StringVar(&uri, "db_dsn", "", "database connection-string.")
-	flag.Parse()
-}
+var migrateCmd = &cobra.Command{
+	Use:   "migrate",
+	Short: "migrate db",
+	Run: func(cmd *cobra.Command, args []string) {
+		flags.Usage = usage
 
-func main() {
-	args := os.Args[1:]
-	flags.Usage = usage
+		if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
+			flags.Usage()
 
-	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
-		flags.Usage()
+			return
+		}
 
-		return
-	}
+		flag.StringVar(&uri, "db_dsn", "", "database connection-string.")
+		flag.Parse()
 
-	command := args[0]
-	switch command {
-	case "create":
-		if err := goose.Run("create", nil, *dir, args[1:]...); err != nil {
+		command := args[0]
+		switch command {
+		case "create":
+			if err := goose.Run("create", nil, *dir, args[1:]...); err != nil {
+				log.Fatalf("migrate run: %v", err)
+			}
+			return
+		case "fix":
+			if err := goose.Run("fix", nil, *dir); err != nil {
+				log.Fatalf("migrate run: %v", err)
+			}
+			return
+		}
+
+		db, err := sql.Open("postgres", uri)
+		if err != nil {
+			panic(fmt.Errorf("sql.Open %w", err))
+		}
+
+		if err = db.Ping(); err != nil {
+			panic(fmt.Errorf("db.Ping %w", err))
+		}
+
+		if err = goose.SetDialect(dialect); err != nil {
+			log.Fatal(err)
+		}
+
+		if err = goose.Run(command, db, *dir, args[1:]...); err != nil {
 			log.Fatalf("migrate run: %v", err)
 		}
-		return
-	case "fix":
-		if err := goose.Run("fix", nil, *dir); err != nil {
-			log.Fatalf("migrate run: %v", err)
-		}
-		return
-	}
-
-	db, err := sql.Open("postgres", uri)
-	if err != nil {
-		panic(fmt.Errorf("sql.Open %w", err))
-	}
-
-	if err = db.Ping(); err != nil {
-		panic(fmt.Errorf("db.Ping %w", err))
-	}
-
-	if err = goose.SetDialect(dialect); err != nil {
-		log.Fatal(err)
-	}
-
-	if err = goose.Run(command, db, *dir, args[1:]...); err != nil {
-		log.Fatalf("migrate run: %v", err)
-	}
+	},
 }
 
 func usage() {

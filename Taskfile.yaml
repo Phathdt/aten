@@ -13,4 +13,4 @@ tasks:
   migrate:
     desc: migrate db
     cmds:
-      - cd migrate && go run main.go {{.CLI_ARGS}}
+      - go run main.go migrate {{.CLI_ARGS}}
