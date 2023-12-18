@@ -1,0 +1,15 @@
+{
+  "name": "migrater",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "migrate": "prisma migrate deploy",
+    "format": "prisma-case-format --file ./prisma/schema.prisma --map-table-case snake,plural --map-field-case snake"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "prisma": "^5.7.0",
+    "prisma-case-format": "^2.0.2"
+  }
+}
