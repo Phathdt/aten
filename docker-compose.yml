@@ -13,8 +13,3 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123123123
       POSTGRES_DB: aten
-
-  app:
-    build:
-      dockerfile: ./Dockerfile.dep
-    stop_grace_period: 1s

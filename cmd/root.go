@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"aten/module/transport/fiberauth"
 	"fmt"
+	"github.com/phathdt/service-context/component/gormc"
 	"os"
 	"time"
 
@@ -22,6 +24,7 @@ func newServiceCtx() sctx.ServiceContext {
 	return sctx.NewServiceContext(
 		sctx.WithName(serviceName),
 		sctx.WithComponent(fiberc.New(common.KeyCompFiber)),
+		sctx.WithComponent(gormc.NewGormDB(common.KeyCompGorm, "")),
 	)
 }
 
@@ -42,6 +45,9 @@ var rootCmd = &cobra.Command{
 		fiberComp := sc.MustGet(common.KeyCompFiber).(fiberc.FiberComponent)
 
 		app := fiberComp.GetApp()
+
+		app.Post("/auth/signup", fiberauth.SignUp(sc))
+		app.Post("/auth/login", fiberauth.Login(sc))
 
 		if err := app.Listen(fmt.Sprintf(":%d", fiberComp.GetPort())); err != nil {
 			logger.Fatal(err)

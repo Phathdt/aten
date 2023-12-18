@@ -5,10 +5,7 @@ dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
 tasks:
   aten:
     cmds:
-      - GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o aten ./main.go
-      - docker-compose build app
-      - rm aten
-      - docker-compose up aten
+      - go run main.go
 
   migrate:
     desc: migrate db
