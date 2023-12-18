@@ -11,13 +11,6 @@ tasks:
       - docker-compose up aten
 
   migrate:
+    desc: migrate db
     cmds:
-      - cd migrator && yarn migrate
-
-  format:
-    cmds:
-      - cd migrator && yarn format
-
-  gen-migrate:
-    cmds:
-      - cd migrator && yarn prisma migrate dev --name "{{.CLI_ARGS}}"
+      - cd migrate && go run main.go {{.CLI_ARGS}}
