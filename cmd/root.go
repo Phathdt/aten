@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"aten/module/transport/fiberauth"
+	"aten/plugins/middleware"
 	"aten/plugins/tokenprovider/jwt"
 	"fmt"
 	"github.com/phathdt/service-context/component/gormc"
@@ -50,6 +51,10 @@ var rootCmd = &cobra.Command{
 
 		app.Post("/auth/signup", fiberauth.SignUp(sc))
 		app.Post("/auth/login", fiberauth.Login(sc))
+
+		app.Use(middleware.RequiredAuth(sc))
+
+		app.Get("/users/me", fiberauth.GetMe(sc))
 
 		if err := app.Listen(fmt.Sprintf(":%d", fiberComp.GetPort())); err != nil {
 			logger.Fatal(err)
