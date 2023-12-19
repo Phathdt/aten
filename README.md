@@ -48,7 +48,85 @@ task aten
 
 ## Usage
 
-Describe how to use the API or other features of the project.
+Certainly! Below is an enhanced usage section with descriptions for the mentioned APIs:
+
+## Usage
+
+The Aten authentication service provides the following APIs for user authentication:
+
+- **Signup**: Create a new user account.
+
+```http
+POST /auth/signup
+```
+
+Example Request:
+```bash
+curl -X POST http://localhost:4000/auth/signup \
+ -H "Content-Type: application/json" \
+ -d '{"email": "exampleuser", "password": "secretpassword"}'
+```
+
+- **Login**: Authenticate an existing user.
+
+```http
+POST /auth/login
+```
+
+Example Request:
+```bash
+curl -X POST http://localhost:4000/auth/login \
+ -H "Content-Type: application/json" \
+ -d '{"email": "exampleuser", "password": "secretpassword"}'
+```
+
+- **OAuth Connect**: Initiate OAuth authentication.
+
+```http
+GET /auth/connect
+```
+
+Example Request:
+```bash
+curl -X GET http://localhost:4000/auth/connect?connector_id=xxx
+```
+
+- **OAuth Callback**: Handle OAuth callback after authentication.
+
+```http
+GET /auth/callback
+```
+
+Example Request:
+```bash
+curl -X GET http://localhost:4000/auth/callback
+```
+
+- **Get User Profile**: Retrieve the user's profile information.
+
+```http
+GET /auth/me
+```
+
+Example Request:
+```bash
+curl -X GET http://localhost:4000/auth/me \
+ -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+- **Check Token Validity**: Check the validity of an access token.
+
+```http
+GET /auth/valid
+```
+
+Example Request:
+```bash
+curl -X GET http://localhost:4000/auth/valid \
+ -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Please ensure proper authentication and authorization headers as required by each API. Refer to the [API documentation](API.md) for detailed information on each endpoint.
 
 ## Contribution
 
