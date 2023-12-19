@@ -6,8 +6,6 @@ import (
 	"aten/shared/common"
 	"github.com/gofiber/fiber/v2"
 	sctx "github.com/phathdt/service-context"
-	"github.com/phathdt/service-context/core"
-	"net/http"
 )
 
 type oauthConnectParams struct {
@@ -30,10 +28,6 @@ func OauthConnect(sc sctx.ServiceContext) fiber.Handler {
 			panic(err)
 		}
 
-		if dex.ShouldRedirect() {
-			return ctx.Redirect(url)
-		}
-
-		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(url))
+		return ctx.Redirect(url)
 	}
 }

@@ -1,11 +1,15 @@
 package fiberauth
 
 import (
+	"aten/module/handlers"
+	"aten/module/storage"
 	"aten/plugins/dexcomp"
+	"aten/plugins/tokenprovider"
 	"aten/shared/common"
-	"errors"
 	"github.com/gofiber/fiber/v2"
 	sctx "github.com/phathdt/service-context"
+	"github.com/phathdt/service-context/component/gormc"
+	"github.com/phathdt/service-context/component/redisc"
 	"github.com/phathdt/service-context/core"
 	"net/http"
 )
@@ -16,52 +20,24 @@ type CallbackParams struct {
 
 func OauthCallback(sc sctx.ServiceContext) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		var p CallbackParams
+
+		if err := ctx.QueryParser(&p); err != nil {
+			panic(err)
+		}
 		dex := sc.MustGet(common.KeyDex).(dexcomp.DexComponent)
+		db := sc.MustGet(common.KeyCompGorm).(gormc.GormComponent).GetDB()
+		tokenProvider := sc.MustGet(common.KeyJwt).(tokenprovider.Provider)
+		rdClient := sc.MustGet(common.KeyCompRedis).(redisc.RedisComponent).GetClient()
 
-		oauthConfig, err := dex.GetOauthConfig()
+		sqlStorage := storage.NewSqlStorage(db)
+		sessionStore := storage.NewSessionStore(rdClient)
+		hdl := handlers.NewOauthCallbackHdl(sqlStorage, sessionStore, dex, tokenProvider)
+		token, err := hdl.Response(ctx.Context(), p.Code)
 		if err != nil {
 			panic(err)
 		}
 
-		var data CallbackParams
-
-		if err := ctx.QueryParser(&data); err != nil {
-			panic(err)
-		}
-		oauth2Token, err := oauthConfig.Exchange(ctx.Context(), data.Code)
-		if err != nil {
-			panic(err)
-		}
-
-		// Extract the ID Token from OAuth2 token.
-		rawIDToken, ok := oauth2Token.Extra("id_token").(string)
-		if !ok {
-			panic(errors.New("missing raw id token"))
-		}
-
-		idTokenVerifier, err := dex.GetIdTokenProvider()
-		if err != nil {
-			panic(err)
-		}
-		// Parse and verify ID Token payload.
-		idToken, err := idTokenVerifier.Verify(ctx.Context(), rawIDToken)
-		if err != nil {
-			panic(err)
-		}
-
-		// Extract custom claims.
-		var claims struct {
-			Email           string `json:"email"`
-			Name            string `json:"name"`
-			FederatedClaims struct {
-				ConnectorID string `json:"connector_id"`
-				UserID      string `json:"user_id"`
-			} `json:"federated_claims"`
-		}
-		if err = idToken.Claims(&claims); err != nil {
-			panic(err)
-		}
-
-		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(claims))
+		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(token))
 	}
 }

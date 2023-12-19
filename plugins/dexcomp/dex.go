@@ -13,7 +13,7 @@ import (
 type DexComponent interface {
 	GetOauthConfig() (*oauth2.Config, error)
 	GetProvider() (*oidc.Provider, error)
-	GetIdTokenProvider() (*oidc.IDTokenVerifier, error)
+	GetIdTokenVerifier() (*oidc.IDTokenVerifier, error)
 	ShouldRedirect() bool
 }
 
@@ -84,7 +84,7 @@ func (d *dexcomp) GetProvider() (*oidc.Provider, error) {
 	return oidc.NewProvider(context.Background(), d.issuer)
 }
 
-func (d *dexcomp) GetIdTokenProvider() (*oidc.IDTokenVerifier, error) {
+func (d *dexcomp) GetIdTokenVerifier() (*oidc.IDTokenVerifier, error) {
 	provider, err := d.GetProvider()
 	if err != nil {
 		return nil, err
