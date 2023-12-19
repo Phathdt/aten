@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"aten/module/models"
+	"aten/plugins/tokenprovider"
+	"aten/shared/common"
 	"aten/shared/errorx"
 	"context"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/phathdt/service-context/core"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 type SignupUser interface {
@@ -16,24 +16,25 @@ type SignupUser interface {
 }
 
 type signupHdl struct {
-	store SignupUser
+	store         SignupUser
+	tokenProvider tokenprovider.Provider
 }
 
-func NewSignupHdl(store SignupUser) *signupHdl {
-	return &signupHdl{store: store}
+func NewSignupHdl(store SignupUser, tokenProvider tokenprovider.Provider) *signupHdl {
+	return &signupHdl{store: store, tokenProvider: tokenProvider}
 }
 
-func (h *signupHdl) Response(ctx context.Context, params *models.SignupRequest) (string, error) {
+func (h *signupHdl) Response(ctx context.Context, params *models.SignupRequest) (tokenprovider.Token, error) {
 	user, err := h.store.GetUserByCondition(ctx, map[string]interface{}{"email": params.Email})
 	if err != nil && user != nil {
-		return "", core.ErrBadRequest.
+		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrUserAlreadyExists.Error()).
 			WithDebug(err.Error())
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", core.ErrBadRequest.
+		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrCreateUser.Error()).
 			WithDebug(err.Error())
 	}
@@ -45,30 +46,21 @@ func (h *signupHdl) Response(ctx context.Context, params *models.SignupRequest) 
 	}
 
 	if err = h.store.CreateUser(ctx, &data); err != nil {
-		return "", core.ErrBadRequest.
+		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrCreateUser.Error()).
 			WithDebug(err.Error())
 	}
 
-	day := time.Hour * 24
-
-	// Create the JWT claims, which includes the user ID and expiry time
-	claims := jwt.MapClaims{
-		"id":    data.Id,
-		"email": data.Email,
-		"exp":   time.Now().Add(day * 1).Unix(),
+	payload := common.TokenPayload{
+		UserId: data.Id,
 	}
 
-	// Create token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
+	accessToken, err := h.tokenProvider.Generate(&payload, 3600*24*30)
 	if err != nil {
-		return "", core.ErrInternalServerError.
+		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrGenToken.Error()).
 			WithDebug(err.Error())
 	}
 
-	return t, nil
+	return accessToken, nil
 }

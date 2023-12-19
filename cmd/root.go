@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"aten/module/transport/fiberauth"
+	"aten/plugins/tokenprovider/jwt"
 	"fmt"
 	"github.com/phathdt/service-context/component/gormc"
 	"os"
@@ -25,6 +26,7 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithName(serviceName),
 		sctx.WithComponent(fiberc.New(common.KeyCompFiber)),
 		sctx.WithComponent(gormc.NewGormDB(common.KeyCompGorm, "")),
+		sctx.WithComponent(jwt.NewJWTProvider(common.KeyJwt)),
 	)
 }
 

@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"aten/module/models"
+	"aten/plugins/tokenprovider"
+	"aten/shared/common"
 	"aten/shared/errorx"
 	"context"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/phathdt/service-context/core"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 type LoginDbStorage interface {
@@ -15,17 +15,18 @@ type LoginDbStorage interface {
 }
 
 type loginHandler struct {
-	store LoginDbStorage
+	store         LoginDbStorage
+	tokenProvider tokenprovider.Provider
 }
 
-func NewLoginHandler(store LoginDbStorage) *loginHandler {
-	return &loginHandler{store: store}
+func NewLoginHandler(store LoginDbStorage, tokenProvider tokenprovider.Provider) *loginHandler {
+	return &loginHandler{store: store, tokenProvider: tokenProvider}
 }
 
-func (h *loginHandler) Response(ctx context.Context, params *models.LoginRequest) (string, error) {
+func (h *loginHandler) Response(ctx context.Context, params *models.LoginRequest) (tokenprovider.Token, error) {
 	user, err := h.store.GetUserByCondition(ctx, map[string]interface{}{"email": params.Email})
 	if err != nil {
-		return "", core.ErrNotFound.
+		return nil, core.ErrNotFound.
 			WithError(errorx.ErrCannotGetUser.Error()).
 			WithDebug(err.Error())
 	}
@@ -34,30 +35,20 @@ func (h *loginHandler) Response(ctx context.Context, params *models.LoginRequest
 	dbPass := []byte(user.Password)
 
 	if err = bcrypt.CompareHashAndPassword(dbPass, userPass); err != nil {
-		return "", core.ErrBadRequest.
+		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrPasswordNotMatch.Error()).
 			WithDebug(err.Error())
 	}
 
-	day := time.Hour * 24
-
-	// Create the JWT claims, which includes the user ID and expiry time
-	claims := jwt.MapClaims{
-		"id":    user.Id,
-		"email": user.Email,
-		"exp":   time.Now().Add(day * 1).Unix(),
+	payload := common.TokenPayload{
+		UserId: user.Id,
 	}
-
-	// Create token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
+	accessToken, err := h.tokenProvider.Generate(&payload, 3600*24*30)
 	if err != nil {
-		return "", core.ErrInternalServerError.
+		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrGenToken.Error()).
 			WithDebug(err.Error())
 	}
 
-	return t, nil
+	return accessToken, nil
 }

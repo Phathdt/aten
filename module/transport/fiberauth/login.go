@@ -4,6 +4,7 @@ import (
 	"aten/module/handlers"
 	"aten/module/models"
 	"aten/module/storage"
+	"aten/plugins/tokenprovider"
 	"aten/plugins/validation"
 	"aten/shared/common"
 	"github.com/gofiber/fiber/v2"
@@ -27,15 +28,14 @@ func Login(sc sctx.ServiceContext) fiber.Handler {
 
 		db := sc.MustGet(common.KeyCompGorm).(gormc.GormComponent).GetDB()
 		sqlStorage := storage.NewSqlStorage(db)
-		hdl := handlers.NewLoginHandler(sqlStorage)
+		tokenProvider := sc.MustGet(common.KeyJwt).(tokenprovider.Provider)
+		hdl := handlers.NewLoginHandler(sqlStorage, tokenProvider)
 
 		token, err := hdl.Response(ctx.Context(), &p)
 		if err != nil {
 			panic(err)
 		}
 
-		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(map[string]interface{}{
-			"token": token,
-		}))
+		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(token))
 	}
 }
