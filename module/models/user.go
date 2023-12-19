@@ -17,13 +17,13 @@ func (u *User) Mask() {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"required,min=8,max=30"`
 }
 
 type SignupRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"required,min=8,max=30"`
 }
 
 type UserCreate struct {

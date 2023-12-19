@@ -10,10 +10,10 @@ require (
 	github.com/jaevor/go-nanoid v1.3.0
 	github.com/lib/pq v1.10.9
 	github.com/namsral/flag v1.7.4-pre
-	github.com/phathdt/service-context v0.0.0-20231217092400-d16f74bba511
+	github.com/phathdt/service-context v0.0.0-20231219152340-83191903e4b1
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.17.0
-	github.com/redis/go-redis/v9 v9.3.0
+	github.com/redis/go-redis/v9 v9.3.1
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.17.0
 	golang.org/x/oauth2 v0.15.0
