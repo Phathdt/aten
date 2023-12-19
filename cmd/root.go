@@ -56,7 +56,8 @@ var rootCmd = &cobra.Command{
 
 		app.Use(middleware.RequiredAuth(sc))
 
-		app.Get("/users/me", fiberauth.GetMe(sc))
+		app.Get("/auth/me", fiberauth.GetMe(sc))
+		app.Get("/auth/valid", fiberauth.CheckValid(sc))
 
 		if err := app.Listen(fmt.Sprintf(":%d", fiberComp.GetPort())); err != nil {
 			logger.Fatal(err)
