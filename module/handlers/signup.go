@@ -6,6 +6,7 @@ import (
 	"aten/shared/common"
 	"aten/shared/errorx"
 	"context"
+	"errors"
 	"github.com/phathdt/service-context/core"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,10 +27,10 @@ func NewSignupHdl(store SignupUser, tokenProvider tokenprovider.Provider) *signu
 
 func (h *signupHdl) Response(ctx context.Context, params *models.SignupRequest) (tokenprovider.Token, error) {
 	user, err := h.store.GetUserByCondition(ctx, map[string]interface{}{"email": params.Email})
-	if err != nil && user != nil {
+	if err == nil && user != nil {
 		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrUserAlreadyExists.Error()).
-			WithDebug(err.Error())
+			WithDebug(errors.New("user already exist").Error())
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
