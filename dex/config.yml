@@ -1,15 +1,9 @@
 issuer: http://127.0.0.1:5556
 
 storage:
-  type: postgres
+  type: sqlite3
   config:
-    host: postgres-db
-    port: 5432
-    database: dex_db
-    user: postgres
-    password: '123123123'
-    ssl:
-      mode: disable
+    file: /etc/dex/dex.db
 
 web:
   http: 0.0.0.0:5556

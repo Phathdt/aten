@@ -18,5 +18,6 @@ services:
     image: dexidp/dex:v2.37.0-alpine
     volumes:
       - ./dex/config.yml:/etc/dex/config.docker.yaml:ro
+      - ./dex/dex.db:/etc/dex/dex.db
     ports:
       - '5556:5556'
