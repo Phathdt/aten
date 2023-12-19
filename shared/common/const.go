@@ -16,6 +16,7 @@ const (
 	KeyCompGorm  = "postgres"
 	KeyCompRedis = "redis"
 	KeyJwt       = "jwt"
+	KeyDex       = "dex"
 )
 
 type TokenPayload struct {

@@ -1,0 +1,47 @@
+issuer: http://127.0.0.1:5556
+
+storage:
+  type: postgres
+  config:
+    host: postgres-db
+    port: 5432
+    database: dex_db
+    user: postgres
+    password: '123123123'
+    ssl:
+      mode: disable
+
+web:
+  http: 0.0.0.0:5556
+
+oauth2:
+  skipApprovalScreen: true
+
+staticClients:
+  - id: aten
+    name: 'Aten'
+    secret: c03879da7f12f890a537b3cacef1569a8493c471
+    redirectURIs:
+      - 'http://localhost:4000/auth/callback'
+
+connectors:
+  - type: github
+    # Required field for connector id.
+    id: github
+    # Required field for connector name.
+    name: GitHub
+    config:
+      # Credentials can be string literals or pulled from the environment.
+      clientID: 7e5587b733914e18bd8a
+      clientSecret: 51282e417fdc8d9d4b80bbc7cbb49f1c5bed9f57
+      redirectURI: http://127.0.0.1:5556/callback
+  - type: github
+    # Required field for connector id.
+    id: github2
+    # Required field for connector name.
+    name: GitHub222
+    config:
+      # Credentials can be string literals or pulled from the environment.
+      clientID: 7e5587b733914e18bd8b
+      clientSecret: 51282e417fdc8d9d4b80bbc7cbb49f1c5bed9f58
+      redirectURI: http://127.0.0.1:5556/callback

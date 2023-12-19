@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"aten/module/transport/fiberauth"
+	"aten/plugins/dexcomp"
 	"aten/plugins/middleware"
 	"aten/plugins/tokenprovider/jwt"
 	"fmt"
@@ -30,6 +31,7 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithComponent(gormc.NewGormDB(common.KeyCompGorm, "")),
 		sctx.WithComponent(jwt.NewJWTProvider(common.KeyJwt)),
 		sctx.WithComponent(redisc.New(common.KeyCompRedis)),
+		sctx.WithComponent(dexcomp.NewDexcomp(common.KeyDex)),
 	)
 }
 
@@ -53,6 +55,8 @@ var rootCmd = &cobra.Command{
 
 		app.Post("/auth/signup", fiberauth.SignUp(sc))
 		app.Post("/auth/login", fiberauth.Login(sc))
+		app.Get("/auth/connect", fiberauth.OauthConnect(sc))
+		app.Get("/auth/callback", fiberauth.OauthCallback(sc))
 
 		app.Use(middleware.RequiredAuth(sc))
 
