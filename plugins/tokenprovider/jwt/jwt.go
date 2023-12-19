@@ -52,7 +52,7 @@ func (j *jwtProvider) Generate(data tokenprovider.TokenPayload, expiry int) (tok
 	now := time.Now()
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, myClaims{
-		Payload: common.TokenPayload{UserId: data.GetUserId()},
+		Payload: common.TokenPayload{UserId: data.GetUserId(), SubToken: data.GetSubToken()},
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Unix(now.Local().Add(time.Second*time.Duration(expiry)).Unix(), 0)),
 			IssuedAt:  jwt.NewNumericDate(time.Unix(now.Local().Unix(), 0)),

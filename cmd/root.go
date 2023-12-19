@@ -6,6 +6,7 @@ import (
 	"aten/plugins/tokenprovider/jwt"
 	"fmt"
 	"github.com/phathdt/service-context/component/gormc"
+	"github.com/phathdt/service-context/component/redisc"
 	"os"
 	"time"
 
@@ -28,6 +29,7 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithComponent(fiberc.New(common.KeyCompFiber)),
 		sctx.WithComponent(gormc.NewGormDB(common.KeyCompGorm, "")),
 		sctx.WithComponent(jwt.NewJWTProvider(common.KeyJwt)),
+		sctx.WithComponent(redisc.New(common.KeyCompRedis)),
 	)
 }
 

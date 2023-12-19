@@ -6,6 +6,7 @@ import (
 	"aten/shared/common"
 	"aten/shared/errorx"
 	"context"
+	"github.com/jaevor/go-nanoid"
 	"github.com/phathdt/service-context/core"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,13 +15,18 @@ type LoginDbStorage interface {
 	GetUserByCondition(ctx context.Context, cond map[string]interface{}) (*models.User, error)
 }
 
+type LoginSessionStorage interface {
+	SetUserToken(ctx context.Context, userId int, token, subToken string, expiredTime int) error
+}
+
 type loginHandler struct {
 	store         LoginDbStorage
+	sStore        LoginSessionStorage
 	tokenProvider tokenprovider.Provider
 }
 
-func NewLoginHandler(store LoginDbStorage, tokenProvider tokenprovider.Provider) *loginHandler {
-	return &loginHandler{store: store, tokenProvider: tokenProvider}
+func NewLoginHandler(store LoginDbStorage, sStore LoginSessionStorage, tokenProvider tokenprovider.Provider) *loginHandler {
+	return &loginHandler{store: store, sStore: sStore, tokenProvider: tokenProvider}
 }
 
 func (h *loginHandler) Response(ctx context.Context, params *models.LoginRequest) (tokenprovider.Token, error) {
@@ -40,11 +46,23 @@ func (h *loginHandler) Response(ctx context.Context, params *models.LoginRequest
 			WithDebug(err.Error())
 	}
 
+	canonicID, _ := nanoid.Standard(21)
+	subToken := canonicID()
+
 	payload := common.TokenPayload{
-		UserId: user.Id,
+		UserId:   user.Id,
+		SubToken: subToken,
 	}
-	accessToken, err := h.tokenProvider.Generate(&payload, 3600*24*30)
+
+	expiredTime := 3600 * 24 * 30
+	accessToken, err := h.tokenProvider.Generate(&payload, expiredTime)
 	if err != nil {
+		return nil, core.ErrBadRequest.
+			WithError(errorx.ErrGenToken.Error()).
+			WithDebug(err.Error())
+	}
+
+	if err = h.sStore.SetUserToken(ctx, user.Id, accessToken.GetToken(), subToken, expiredTime); err != nil {
 		return nil, core.ErrBadRequest.
 			WithError(errorx.ErrGenToken.Error()).
 			WithDebug(err.Error())
