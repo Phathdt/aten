@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	sctx "github.com/CaliberVB/service-context"
-	"github.com/CaliberVB/service-context/core"
+	"aten/plugins/tokenprovider"
+	"aten/shared/common"
 	"github.com/gofiber/fiber/v2"
+	sctx "github.com/phathdt/service-context"
+	"github.com/phathdt/service-context/core"
 	"github.com/pkg/errors"
 	"strings"
-	common "telifi-common"
-	"telifi-plugins/tokenprovider"
 )
 
 func extractTokenFromHeaderString(headers []string) (string, error) {

@@ -5,14 +5,14 @@ go 1.21.3
 require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/gofiber/fiber/v2 v2.51.0
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/lib/pq v1.10.9
 	github.com/namsral/flag v1.7.4-pre
 	github.com/phathdt/service-context v0.0.0-20231217092400-d16f74bba511
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.17.0
 	github.com/spf13/cobra v1.8.0
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 	gorm.io/gorm v1.25.5
 )
 

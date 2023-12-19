@@ -5,7 +5,7 @@ import (
 	"aten/shared/common"
 	"flag"
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 
 	sctx "github.com/phathdt/service-context"
