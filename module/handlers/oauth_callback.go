@@ -10,6 +10,7 @@ import (
 	"github.com/coreos/go-oidc"
 	"github.com/jaevor/go-nanoid"
 	"github.com/phathdt/service-context/core"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 )
 
@@ -46,7 +47,7 @@ func (h *oauthCallbackHdl) Response(ctx context.Context, code string) (tokenprov
 
 	oauth2Token, err := oauthConfig.Exchange(ctx, code)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// Extract the ID Token from OAuth2 token.
@@ -84,10 +85,17 @@ func (h *oauthCallbackHdl) Response(ctx context.Context, code string) (tokenprov
 			return nil, err
 		}
 		canonicID, _ := nanoid.Standard(21)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(canonicID()), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, core.ErrBadRequest.
+				WithError(errorx.ErrCreateUser.Error()).
+				WithDebug(err.Error())
+		}
+
 		data := models.UserCreate{
 			SQLModel: core.NewSQLModel(),
 			Email:    claims.Email,
-			Password: canonicID(),
+			Password: string(hashedPassword),
 		}
 
 		if err = h.repo.CreateUser(ctx, &data); err != nil {
