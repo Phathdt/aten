@@ -14,6 +14,7 @@ type DexComponent interface {
 	GetOauthConfig() (*oauth2.Config, error)
 	GetProvider() (*oidc.Provider, error)
 	GetIdTokenProvider() (*oidc.IDTokenVerifier, error)
+	ShouldRedirect() bool
 }
 
 type dexcomp struct {
@@ -21,8 +22,10 @@ type dexcomp struct {
 	clientId       string
 	clientSecret   string
 	issuer         string
+	atenEndpoint   string
 	clientEndpoint string
 	scopes         string
+	redirect       bool
 }
 
 func NewDexcomp(id string) *dexcomp {
@@ -37,8 +40,10 @@ func (d *dexcomp) InitFlags() {
 	flag.StringVar(&d.clientId, "dex_client_id", "client_id", "dex client id")
 	flag.StringVar(&d.clientSecret, "dex_client_secret", "client_secret", "dex client secret")
 	flag.StringVar(&d.issuer, "dex_issuer", "http://127.0.0.1:5556", "dex issuer")
-	flag.StringVar(&d.clientEndpoint, "dex_client_endpoint", "http://localhost:4000", "dex client endpoint")
+	flag.StringVar(&d.atenEndpoint, "dex_aten_endpoint", "http://localhost:4000", "dex aten endpoint")
+	flag.StringVar(&d.clientEndpoint, "dex_client_endpoint", "http://localhost:3000/oauth/callback?token=", "dex client endpoint")
 	flag.StringVar(&d.scopes, "dex_scopes", "profile,email,groups,federated:id", "dex scopes ")
+	flag.BoolVar(&d.redirect, "dex_redirect", true, "dex redirect or return json")
 }
 
 func (d *dexcomp) Activate(context sctx.ServiceContext) error {
@@ -63,7 +68,7 @@ func (d *dexcomp) GetOauthConfig() (*oauth2.Config, error) {
 		ClientSecret: d.clientSecret,
 
 		// The redirectURL.
-		RedirectURL: fmt.Sprintf("%s/auth/callback", d.clientEndpoint),
+		RedirectURL: fmt.Sprintf("%s/auth/callback", d.atenEndpoint),
 
 		// Discovery returns the OAuth2 endpoints.
 		Endpoint: provider.Endpoint(),
@@ -88,4 +93,8 @@ func (d *dexcomp) GetIdTokenProvider() (*oidc.IDTokenVerifier, error) {
 	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: d.clientId})
 
 	return idTokenVerifier, nil
+}
+
+func (d *dexcomp) ShouldRedirect() bool {
+	return d.redirect
 }

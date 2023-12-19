@@ -1,35 +1,39 @@
 package fiberauth
 
 import (
+	"aten/module/handlers"
 	"aten/plugins/dexcomp"
 	"aten/shared/common"
 	"github.com/gofiber/fiber/v2"
-	"github.com/jaevor/go-nanoid"
 	sctx "github.com/phathdt/service-context"
-	"net/url"
+	"github.com/phathdt/service-context/core"
+	"net/http"
 )
+
+type oauthConnectParams struct {
+	ConnectorId string `query:"connector_id"`
+}
 
 func OauthConnect(sc sctx.ServiceContext) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		var p oauthConnectParams
+
+		if err := ctx.QueryParser(&p); err != nil {
+			panic(err)
+		}
+
 		dex := sc.MustGet(common.KeyDex).(dexcomp.DexComponent)
 
-		oauthConfig, err := dex.GetOauthConfig()
+		hdl := handlers.NewOauthConnectHdl(dex)
+		url, err := hdl.Response(ctx.Context(), p.ConnectorId)
 		if err != nil {
 			panic(err)
 		}
 
-		canonicID, _ := nanoid.Standard(21)
-		state := canonicID()
-
-		authUrl := oauthConfig.AuthCodeURL(state)
-
-		u, err := url.Parse(authUrl)
-		if err != nil {
-			panic(err)
+		if dex.ShouldRedirect() {
+			return ctx.Redirect(url)
 		}
 
-		u.Path += "/github"
-
-		return ctx.Redirect(u.String())
+		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(url))
 	}
 }
