@@ -1,14 +1,14 @@
 package cmd
 
 import (
-	"aten/module/transport/fiberauth"
 	"aten/plugins/dexcomp"
-	"aten/plugins/middleware"
 	"aten/plugins/tokenprovider/jwt"
 	"fmt"
 	"github.com/phathdt/service-context/component/gormc"
 	"github.com/phathdt/service-context/component/redisc"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/phathdt/service-context/component/fiberc"
@@ -43,29 +43,21 @@ var rootCmd = &cobra.Command{
 
 		logger := sctx.GlobalLogger().GetLogger("service")
 
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 1)
+
+		NewRouter(sc)
 
 		if err := sc.Load(); err != nil {
 			logger.Fatal(err)
 		}
 
-		fiberComp := sc.MustGet(common.KeyCompFiber).(fiberc.FiberComponent)
+		// gracefully shutdown
+		quit := make(chan os.Signal)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
 
-		app := fiberComp.GetApp()
-
-		app.Post("/auth/signup", fiberauth.SignUp(sc))
-		app.Post("/auth/login", fiberauth.Login(sc))
-		app.Get("/auth/connect", fiberauth.OauthConnect(sc))
-		app.Get("/auth/callback", fiberauth.OauthCallback(sc))
-
-		app.Use(middleware.RequiredAuth(sc))
-
-		app.Get("/auth/me", fiberauth.GetMe(sc))
-		app.Get("/auth/valid", fiberauth.CheckValid(sc))
-
-		if err := app.Listen(fmt.Sprintf(":%d", fiberComp.GetPort())); err != nil {
-			logger.Fatal(err)
-		}
+		_ = sc.Stop()
+		logger.Info("Server exited")
 	},
 }
 
