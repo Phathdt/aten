@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"aten/module/transport/fiberauth"
-	middleware2 "aten/plugins/middleware"
 	"aten/shared/common"
+	middleware2 "aten/shared/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"

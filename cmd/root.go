@@ -29,7 +29,7 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithName(serviceName),
 		sctx.WithComponent(fiberc.New(common.KeyCompFiber)),
 		sctx.WithComponent(gormc.NewGormDB(common.KeyCompGorm, "")),
-		sctx.WithComponent(jwt.NewJWTProvider(common.KeyJwt)),
+		sctx.WithComponent(jwt.New(common.KeyJwt)),
 		sctx.WithComponent(redisc.New(common.KeyCompRedis)),
 		sctx.WithComponent(dexcomp.NewDexcomp(common.KeyDex)),
 	)

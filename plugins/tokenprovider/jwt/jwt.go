@@ -20,7 +20,7 @@ func (j *jwtProvider) ID() string {
 	return j.id
 }
 
-func NewJWTProvider(id string) *jwtProvider {
+func New(id string) *jwtProvider {
 	return &jwtProvider{id: id}
 }
 
