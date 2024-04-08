@@ -23,6 +23,8 @@ func OauthCallback(sc sctx.ServiceContext) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		var p CallbackParams
 
+		logger := sctx.GlobalLogger().GetLogger("service")
+
 		if err := ctx.QueryParser(&p); err != nil {
 			panic(err)
 		}
@@ -36,11 +38,17 @@ func OauthCallback(sc sctx.ServiceContext) fiber.Handler {
 		hdl := handlers.NewOauthCallbackHdl(sqlStorage, sessionStore, dex, tokenProvider)
 		res, err := hdl.Response(ctx.Context(), p.Code)
 		if err != nil {
-			panic(err)
+			logger.Error(err)
+
+			if dex.GetRedirect() {
+				return ctx.Redirect(fmt.Sprintf("%s", dex.GetClientErrEndpoint()), http.StatusMovedPermanently)
+			}
+
+			return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(err))
 		}
 
 		if dex.GetRedirect() {
-			return ctx.Redirect(fmt.Sprintf("%s?token=%s", dex.GetClientEndpoint(), res.GetToken()))
+			return ctx.Redirect(fmt.Sprintf("%s?token=%s", dex.GetClientEndpoint(), res.GetToken()), http.StatusMovedPermanently)
 		}
 
 		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(res))

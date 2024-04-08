@@ -15,18 +15,20 @@ type DexComponent interface {
 	GetProvider() (*oidc.Provider, error)
 	GetIdTokenVerifier() (*oidc.IDTokenVerifier, error)
 	GetClientEndpoint() string
+	GetClientErrEndpoint() string
 	GetRedirect() bool
 }
 
 type dexcomp struct {
-	id             string
-	clientId       string
-	clientSecret   string
-	issuer         string
-	atenEndpoint   string
-	clientEndpoint string
-	scopes         string
-	redirect       bool
+	id                string
+	clientId          string
+	clientSecret      string
+	issuer            string
+	atenEndpoint      string
+	clientEndpoint    string
+	clientErrEndpoint string
+	scopes            string
+	redirect          bool
 }
 
 func NewDexcomp(id string) *dexcomp {
@@ -43,6 +45,7 @@ func (d *dexcomp) InitFlags() {
 	flag.StringVar(&d.issuer, "dex_issuer", "http://127.0.0.1:5556", "dex issuer")
 	flag.StringVar(&d.atenEndpoint, "dex_aten_endpoint", "http://localhost:4000", "dex aten endpoint")
 	flag.StringVar(&d.clientEndpoint, "dex_client_endpoint", "http://localhost:3000/oauth/callback", "dex client endpoint")
+	flag.StringVar(&d.clientErrEndpoint, "dex_client_err_endpoint", "http://localhost:3000/oauth/error", "dex client error endpoint")
 	flag.StringVar(&d.scopes, "dex_scopes", "profile,email,groups,federated:id", "dex scopes ")
 	flag.BoolVar(&d.redirect, "dex_redirect", true, "dex redirect or return json")
 }
@@ -98,6 +101,10 @@ func (d *dexcomp) GetIdTokenVerifier() (*oidc.IDTokenVerifier, error) {
 
 func (d *dexcomp) GetClientEndpoint() string {
 	return d.clientEndpoint
+}
+
+func (d *dexcomp) GetClientErrEndpoint() string {
+	return d.clientErrEndpoint
 }
 
 func (d *dexcomp) GetRedirect() bool {
