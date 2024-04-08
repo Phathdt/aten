@@ -14,7 +14,8 @@ type DexComponent interface {
 	GetOauthConfig() (*oauth2.Config, error)
 	GetProvider() (*oidc.Provider, error)
 	GetIdTokenVerifier() (*oidc.IDTokenVerifier, error)
-	ShouldRedirect() bool
+	GetClientEndpoint() string
+	GetRedirect() bool
 }
 
 type dexcomp struct {
@@ -41,7 +42,7 @@ func (d *dexcomp) InitFlags() {
 	flag.StringVar(&d.clientSecret, "dex_client_secret", "client_secret", "dex client secret")
 	flag.StringVar(&d.issuer, "dex_issuer", "http://127.0.0.1:5556", "dex issuer")
 	flag.StringVar(&d.atenEndpoint, "dex_aten_endpoint", "http://localhost:4000", "dex aten endpoint")
-	flag.StringVar(&d.clientEndpoint, "dex_client_endpoint", "http://localhost:3000/oauth/callback?token=", "dex client endpoint")
+	flag.StringVar(&d.clientEndpoint, "dex_client_endpoint", "http://localhost:3000/oauth/callback", "dex client endpoint")
 	flag.StringVar(&d.scopes, "dex_scopes", "profile,email,groups,federated:id", "dex scopes ")
 	flag.BoolVar(&d.redirect, "dex_redirect", true, "dex redirect or return json")
 }
@@ -95,6 +96,10 @@ func (d *dexcomp) GetIdTokenVerifier() (*oidc.IDTokenVerifier, error) {
 	return idTokenVerifier, nil
 }
 
-func (d *dexcomp) ShouldRedirect() bool {
+func (d *dexcomp) GetClientEndpoint() string {
+	return d.clientEndpoint
+}
+
+func (d *dexcomp) GetRedirect() bool {
 	return d.redirect
 }

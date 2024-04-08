@@ -6,6 +6,7 @@ import (
 	"aten/plugins/dexcomp"
 	"aten/plugins/tokenprovider"
 	"aten/shared/common"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	sctx "github.com/phathdt/service-context"
 	"github.com/phathdt/service-context/component/gormc"
@@ -33,11 +34,15 @@ func OauthCallback(sc sctx.ServiceContext) fiber.Handler {
 		sqlStorage := storage.NewSqlStorage(db)
 		sessionStore := storage.NewSessionStore(rdClient)
 		hdl := handlers.NewOauthCallbackHdl(sqlStorage, sessionStore, dex, tokenProvider)
-		token, err := hdl.Response(ctx.Context(), p.Code)
+		res, err := hdl.Response(ctx.Context(), p.Code)
 		if err != nil {
 			panic(err)
 		}
 
-		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(token))
+		if dex.GetRedirect() {
+			return ctx.Redirect(fmt.Sprintf("%s?token=%s", dex.GetClientEndpoint(), res.GetToken()))
+		}
+
+		return ctx.Status(http.StatusOK).JSON(core.SimpleSuccessResponse(res))
 	}
 }
