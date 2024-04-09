@@ -63,6 +63,7 @@ func (h *signupHdl) Response(ctx context.Context, params *models.SignupRequest) 
 
 	payload := common.TokenPayload{
 		UserId:   data.Id,
+		Email:    data.Email,
 		SubToken: subToken,
 	}
 

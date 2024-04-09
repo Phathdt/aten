@@ -21,6 +21,7 @@ const (
 
 type TokenPayload struct {
 	UserId   int    `json:"user_id"`
+	Email    string `json:"email"`
 	SubToken string `json:"sub_token"`
 }
 
@@ -30,4 +31,8 @@ func (t TokenPayload) GetUserId() int {
 
 func (t TokenPayload) GetSubToken() string {
 	return t.SubToken
+}
+
+func (t TokenPayload) GetEmail() string {
+	return t.Email
 }

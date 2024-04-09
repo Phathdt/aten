@@ -51,6 +51,7 @@ func (h *loginHandler) Response(ctx context.Context, params *models.LoginRequest
 
 	payload := common.TokenPayload{
 		UserId:   user.Id,
+		Email:    user.Email,
 		SubToken: subToken,
 	}
 

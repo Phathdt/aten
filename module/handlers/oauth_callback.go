@@ -116,6 +116,7 @@ func (h *oauthCallbackHdl) Response(ctx context.Context, code string) (tokenprov
 
 	payload := common.TokenPayload{
 		UserId:   user.Id,
+		Email:    user.Email,
 		SubToken: subToken,
 	}
 

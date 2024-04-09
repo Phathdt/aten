@@ -13,6 +13,7 @@ type Provider interface {
 type TokenPayload interface {
 	GetUserId() int
 	GetSubToken() string
+	GetEmail() string
 }
 
 type Token interface {
