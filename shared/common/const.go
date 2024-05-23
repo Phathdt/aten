@@ -4,10 +4,14 @@ import (
 	"github.com/namsral/flag"
 )
 
-var ShowLog = false
+var (
+	ShowLog     = false
+	AllowSignup = false
+)
 
 func init() {
 	flag.BoolVar(&ShowLog, "show-log", false, "show log")
+	flag.BoolVar(&AllowSignup, "allow-signup", true, "allow signup")
 	flag.Parse()
 }
 

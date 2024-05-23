@@ -17,6 +17,13 @@ import (
 
 func SignUp(sc sctx.ServiceContext) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		if !common.AllowSignup {
+			return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+				"code":    http.StatusBadRequest,
+				"message": "not allow",
+			})
+		}
+
 		var p models.SignupRequest
 
 		if err := ctx.BodyParser(&p); err != nil {
